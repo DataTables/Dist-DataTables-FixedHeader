@@ -1,4 +1,4 @@
-/*! FixedHeader 3.0.0
+/*! FixedHeader 3.0.1-dev
  * ©2009-2015 SpryMedia Ltd - datatables.net/license
  */
 
@@ -6,7 +6,7 @@
  * @summary     FixedHeader
  * @description Fix a table's header or footer, so it is always visible while
  *              scrolling
- * @version     3.0.0
+ * @version     3.0.1-dev
  * @file        dataTables.fixedHeader.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
@@ -22,12 +22,25 @@
  * For details please refer to: http://www.datatables.net
  */
 
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables'], factory );
+	}
+	else if ( typeof exports === 'object' ) {
+		// Node / CommonJS
+		module.exports = function ($, dt) {
+			if ( ! $ ) { $ = require('jquery'); }
+			factory( $, dt || $.fn.dataTable || require('datatables') );
+		};
+	}
+	else if ( jQuery ) {
+		// Browser standard
+		factory( jQuery, jQuery.fn.dataTable );
+	}
+}(function( $, DataTable ) {
+'use strict';
 
-(function(window, document, undefined) {
-
-
-var factory = function( $, DataTable ) {
-"use strict";
 
 var _instCounter = 0;
 
@@ -62,7 +75,13 @@ var FixedHeader = function ( dt, config ) {
 		},
 		headerMode: null,
 		footerMode: null,
-		namespace: '.dtfc'+(_instCounter++)
+		autoWidth: dt.settings()[0].oFeatures.bAutoWidth,
+		namespace: '.dtfc'+(_instCounter++),
+		scrollLeft: {
+			header: -1,
+			footer: -1
+		},
+		enable: true
 	};
 
 	this.dom = {
@@ -101,15 +120,46 @@ var FixedHeader = function ( dt, config ) {
  * Purpose:  Prototype for FixedHeader
  * Scope:    global
  */
-FixedHeader.prototype = {
+$.extend( FixedHeader.prototype, {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * API methods
 	 */
 	
 	/**
+	 * Enable / disable the fixed elements
+	 *
+	 * @param  {boolean} enable `true` to enable, `false` to disable
+	 */
+	enable: function ( enable )
+	{
+		this.s.enable = enable;
+
+		if ( this.c.header ) {
+			this._modeChange( 'in-place', 'header', true );
+		}
+
+		if ( this.c.footer && this.dom.tfoot.length ) {
+			this._modeChange( 'in-place', 'footer', true );
+		}
+
+		this.update();
+	},
+	
+	/**
+	 * Set headerOffset 
+	 *
+	 * @param  {int} new value for headerOffset
+	 */
+	headerOffset: function ( topOffset )
+  {
+		this.c.headerOffset = topOffset;
+  },
+	
+	/**
 	 * Recalculate the position of the fixed elements and force them into place
 	 */
-	update: function () {
+	update: function ()
+	{
 		this._positions();
 		this._scroll( true );
 	},
@@ -136,23 +186,16 @@ FixedHeader.prototype = {
 			} )
 			.on( 'resize'+this.s.namespace, function () {
 				that.s.position.windowHeight = $(window).height();
-				that._positions();
-				that._scroll( true );
+				that.update();
 			} );
 
-		dt
-			.on( 'column-reorder.dt.dtfc column-visibility.dt.dtfc', function () {
-				that._positions();
-				that._scroll( true );
-			} )
-			.on( 'draw.dtfc', function () {
-				that._positions();
-				that._scroll();
-			} );
+		dt.on( 'column-reorder.dt.dtfc column-visibility.dt.dtfc draw.dt.dtfc', function () {
+			that.update();
+		} );
 
 		dt.on( 'destroy.dtfc', function () {
 			dt.off( '.dtfc' );
-			$(window).off( this.s.namespace );
+			$(window).off( that.s.namespace );
 		} );
 
 		this._positions();
@@ -202,10 +245,8 @@ FixedHeader.prototype = {
 			itemDom.placeholder = itemElement.clone( false );
 			itemDom.host.append( itemDom.placeholder );
 
-			// Footer needs sizes cloned across
-			if ( item === 'footer' ) {
-				this._footerMatch( itemDom.placeholder, itemDom.floating );
-			}
+			// Clone widths
+			this._matchWidths( itemDom.placeholder, itemDom.floating );
 		}
 	},
 
@@ -213,13 +254,14 @@ FixedHeader.prototype = {
 	 * Copy widths from the cells in one element to another. This is required
 	 * for the footer as the footer in the main table takes its sizes from the
 	 * header columns. That isn't present in the footer so to have it still
-	 * align correctly, the sizes need to be copied over.
+	 * align correctly, the sizes need to be copied over. It is also required
+	 * for the header when auto width is not enabled
 	 *
 	 * @param  {jQuery} from Copy widths from
 	 * @param  {jQuery} to   Copy widths to
 	 * @private
 	 */
-	_footerMatch: function ( from, to ) {
+	_matchWidths: function ( from, to ) {
 		var type = function ( name ) {
 			var toWidths = $(name, from)
 				.map( function () {
@@ -227,7 +269,7 @@ FixedHeader.prototype = {
 				} ).toArray();
 
 			$(name, to).each( function ( i ) {
-				$(this).width( toWidths[i] );
+				$(this).width( toWidths[i] ).css("min-width", toWidths[i] );
 			} );
 		};
 
@@ -238,15 +280,38 @@ FixedHeader.prototype = {
 	/**
 	 * Remove assigned widths from the cells in an element. This is required
 	 * when inserting the footer back into the main table so the size is defined
-	 * by the header columns.
+	 * by the header columns and also when auto width is disabled in the
+	 * DataTable.
 	 *
+	 * @param  {string} item The `header` or `footer`
 	 * @private
 	 */
-	_footerUnsize: function () {
-		var footer = this.dom.footer.floating;
+	_unsize: function ( item ) {
+		var el = this.dom[ item ].floating;
 
-		if ( footer ) {
-			$('th, td', footer).css( 'width', '' );
+		if ( el && (item === 'footer' || (item === 'header' && ! this.s.autoWidth)) ) {
+			$('th, td', el).css( 'width', '' );
+		}
+	},
+
+	/**
+	 * Reposition the floating elements to take account of horizontal page
+	 * scroll
+	 *
+	 * @param  {string} item       The `header` or `footer`
+	 * @param  {int}    scrollLeft Document scrollLeft
+	 * @private
+	 */
+	_horizontal: function ( item, scrollLeft )
+	{
+		var itemDom = this.dom[ item ];
+		var position = this.s.position;
+		var lastScrollLeft = this.s.scrollLeft;
+
+		if ( itemDom.floating && lastScrollLeft[ item ] !== scrollLeft ) {
+			itemDom.floating.css( 'left', position.left - scrollLeft );
+
+			lastScrollLeft[ item ] = scrollLeft;
 		}
 	},
 
@@ -278,6 +343,8 @@ FixedHeader.prototype = {
 				itemDom.placeholder = null;
 			}
 
+			this._unsize( item );
+
 			itemDom.host.append( item === 'header' ?
 				this.dom.thead :
 				this.dom.tfoot
@@ -286,10 +353,6 @@ FixedHeader.prototype = {
 			if ( itemDom.floating ) {
 				itemDom.floating.remove();
 				itemDom.floating = null;
-			}
-
-			if ( item === 'footer' ) {
-				this._footerUnsize();
 			}
 		}
 		else if ( mode === 'in' ) {
@@ -328,6 +391,8 @@ FixedHeader.prototype = {
 				.css( 'width', position.width+'px' );
 		}
 
+		this.s.scrollLeft.header = -1;
+		this.s.scrollLeft.footer = -1;
 		this.s[item+'Mode'] = mode;
 	},
 
@@ -383,8 +448,13 @@ FixedHeader.prototype = {
 	_scroll: function ( forceChange )
 	{
 		var windowTop = $(document).scrollTop();
+		var windowLeft = $(document).scrollLeft();
 		var position = this.s.position;
 		var headerMode, footerMode;
+
+		if ( ! this.s.enable ) {
+			return;
+		}
 
 		if ( this.c.header ) {
 			if ( ! position.visible || windowTop <= position.theadTop - this.c.headerOffset ) {
@@ -400,6 +470,8 @@ FixedHeader.prototype = {
 			if ( forceChange || headerMode !== this.s.headerMode ) {
 				this._modeChange( headerMode, 'header', forceChange );
 			}
+
+			this._horizontal( 'header', windowLeft );
 		}
 
 		if ( this.c.footer && this.dom.tfoot.length ) {
@@ -416,9 +488,11 @@ FixedHeader.prototype = {
 			if ( forceChange || footerMode !== this.s.footerMode ) {
 				this._modeChange( footerMode, 'footer', forceChange );
 			}
+
+			this._horizontal( 'footer', windowLeft );
 		}
 	}
-};
+} );
 
 
 /**
@@ -426,7 +500,7 @@ FixedHeader.prototype = {
  * @type {String}
  * @static
  */
-FixedHeader.version = "3.0.0";
+FixedHeader.version = "3.0.1-dev";
 
 /**
  * Defaults
@@ -459,7 +533,7 @@ $(document).on( 'init.dt.dtb', function (e, settings, json) {
 
 	var opts = settings.oInit.fixedHeader || DataTable.defaults.fixedHeader;
 
-	if ( opts && ! settings._buttons ) {
+	if ( opts && ! settings._fixedHeader ) {
 		new FixedHeader( settings, opts );
 	}
 } );
@@ -477,23 +551,35 @@ DataTable.Api.register( 'fixedHeader.adjust()', function () {
 	} );
 } );
 
+DataTable.Api.register( 'fixedHeader.enable()', function ( flag ) {
+	return this.iterator( 'table', function ( ctx ) {
+		var fh = ctx._fixedHeader;
+
+		if ( fh ) {
+			fh.enable( flag !== undefined ? flag : true );
+		}
+	} );
+} );
+
+DataTable.Api.register( 'fixedHeader.disable()', function ( ) {
+	return this.iterator( 'table', function ( ctx ) {
+		var fh = ctx._fixedHeader;
+
+		if ( fh ) {
+			fh.enable( false );
+		}
+	} );
+} );
+
+DataTable.Api.register( 'fixedHeader.headerOffset()', function ( topOffset ) {
+	return this.iterator( 'table', function ( ctx ) {
+		var fh = ctx._fixedHeader;
+
+		if ( fh ) {
+			fh.headerOffset( topOffset );
+		}
+	} );
+} );
 
 return FixedHeader;
-}; // /factory
-
-
-// Define as an AMD module if possible
-if ( typeof define === 'function' && define.amd ) {
-	define( ['jquery', 'datatables'], factory );
-}
-else if ( typeof exports === 'object' ) {
-    // Node/CommonJS
-    factory( require('jquery'), require('datatables') );
-}
-else if ( jQuery && !jQuery.fn.dataTable.FixedHeader ) {
-	// Otherwise simply initialise as normal, stopping multiple evaluation
-	factory( jQuery, jQuery.fn.dataTable );
-}
-
-
-})(window, document);
+}));
