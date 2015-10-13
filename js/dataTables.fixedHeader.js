@@ -1,4 +1,4 @@
-/*! FixedHeader 3.0.1-dev
+/*! FixedHeader 3.1.0-dev
  * ©2009-2015 SpryMedia Ltd - datatables.net/license
  */
 
@@ -6,7 +6,7 @@
  * @summary     FixedHeader
  * @description Fix a table's header or footer, so it is always visible while
  *              scrolling
- * @version     3.0.1-dev
+ * @version     3.1.0-dev
  * @file        dataTables.fixedHeader.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
@@ -25,21 +25,24 @@
 (function( factory ){
 	if ( typeof define === 'function' && define.amd ) {
 		// AMD
-		define( ['jquery', 'datatables'], factory );
+		define( ['jquery', 'datatables.net'], factory );
 	}
 	else if ( typeof exports === 'object' ) {
-		// Node / CommonJS
-		module.exports = function ($, dt) {
+		// CommonJS
+		module.exports = function ($) {
 			if ( ! $ ) { $ = require('jquery'); }
-			factory( $, dt || $.fn.dataTable || require('datatables') );
+			if ( ! $.fn.dataTable ) { require('datatables.net')($); }
+
+			factory( $ );
 		};
 	}
-	else if ( jQuery ) {
-		// Browser standard
-		factory( jQuery, jQuery.fn.dataTable );
+	else {
+		// Browser
+		factory( jQuery );
 	}
-}(function( $, DataTable ) {
+}(function( $ ) {
 'use strict';
+var DataTable = $.fn.dataTable;
 
 
 var _instCounter = 0;
@@ -511,7 +514,7 @@ $.extend( FixedHeader.prototype, {
  * @type {String}
  * @static
  */
-FixedHeader.version = "3.0.1-dev";
+FixedHeader.version = "3.1.0-dev";
 
 /**
  * Defaults
