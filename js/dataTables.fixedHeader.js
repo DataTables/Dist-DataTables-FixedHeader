@@ -122,6 +122,18 @@ var FixedHeader = function ( dt, config ) {
 	dtSettings._fixedHeader = this;
 
 	this._constructor();
+	
+	var $scrollBody= $("."+dt.settings()[0].oClasses.sScrollBody);
+
+	var timer= setInterval(function(){
+		var $firstTD= $scrollBody.find("tr:first-child td:first-child");
+		if($firstTD.length > 0){
+			clearInterval(timer);
+			$scrollBody.scroll(function(){
+				$(".fixedHeader-floating").css("left", $firstTD.offset().left);	
+			});
+		}
+	}, 300);
 };
 
 
