@@ -5,7 +5,7 @@
     "files": [
         "js/**/*.js"
     ],
-    "main": "./js/dataTables.fixedHeader.js",
+    "main": "js/dataTables.fixedHeader.js",
     "keywords": [
         "fixed headers",
         "sticky",
