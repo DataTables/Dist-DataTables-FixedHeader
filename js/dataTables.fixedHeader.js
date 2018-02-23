@@ -1,16 +1,16 @@
-/*! FixedHeader 3.1.4-dev
- * ©2009-2018 SpryMedia Ltd - datatables.net/license
+/*! FixedHeader 3.1.3-dev
+ * ©2009-2016 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     FixedHeader
  * @description Fix a table's header or footer, so it is always visible while
  *              scrolling
- * @version     3.1.4-dev
+ * @version     3.1.3-dev
  * @file        dataTables.fixedHeader.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
- * @copyright   Copyright 2009-2018 SpryMedia Ltd.
+ * @copyright   Copyright 2009-2016 SpryMedia Ltd.
  *
  * This source file is free software, available under the following license:
  *   MIT license - http://datatables.net/license/mit
@@ -403,10 +403,6 @@ $.extend( FixedHeader.prototype, {
 		var focus = $.contains( tablePart[0], document.activeElement ) ?
 			document.activeElement :
 			null;
-		
-		if ( focus ) {
-			focus.blur();
-		}
 
 		if ( mode === 'in-place' ) {
 			// Insert the header back into the table's real header
@@ -418,10 +414,10 @@ $.extend( FixedHeader.prototype, {
 			this._unsize( item );
 
 			if ( item === 'header' ) {
-				itemDom.host.prepend( tablePart );
+				itemDom.host.prepend( this.dom.thead );
 			}
 			else {
-				itemDom.host.append( tablePart );
+				itemDom.host.append( this.dom.tfoot );
 			}
 
 			if ( itemDom.floating ) {
@@ -467,9 +463,7 @@ $.extend( FixedHeader.prototype, {
 
 		// Restore focus if it was lost
 		if ( focus && focus !== document.activeElement ) {
-			setTimeout( function () {
-				focus.focus();
-			}, 10 );
+			focus.focus();
 		}
 
 		this.s.scrollLeft.header = -1;
@@ -581,7 +575,7 @@ $.extend( FixedHeader.prototype, {
  * @type {String}
  * @static
  */
-FixedHeader.version = "3.1.4-dev";
+FixedHeader.version = "3.1.3-dev";
 
 /**
  * Defaults
@@ -641,9 +635,8 @@ DataTable.Api.register( 'fixedHeader.enable()', function ( flag ) {
 	return this.iterator( 'table', function ( ctx ) {
 		var fh = ctx._fixedHeader;
 
-		flag = ( flag !== undefined ? flag : true );
-		if ( fh && flag !== fh.s.enable ) {
-			fh.enable( flag );
+		if ( fh ) {
+			fh.enable( flag !== undefined ? flag : true );
 		}
 	} );
 } );
@@ -652,7 +645,7 @@ DataTable.Api.register( 'fixedHeader.disable()', function ( ) {
 	return this.iterator( 'table', function ( ctx ) {
 		var fh = ctx._fixedHeader;
 
-		if ( fh && fh.s.enable ) {
+		if ( fh ) {
 			fh.enable( false );
 		}
 	} );
