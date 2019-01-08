@@ -332,6 +332,9 @@ $.extend( FixedHeader.prototype, {
 		var get = function ( name ) {
 			return $(name, from)
 				.map( function () {
+					if($(this).css('width')) {
+						return $(this).css('width');
+					}
 					return $(this).width();
 				} ).toArray();
 		};
