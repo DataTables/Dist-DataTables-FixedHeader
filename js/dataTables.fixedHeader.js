@@ -585,7 +585,7 @@ $.extend( FixedHeader.prototype, {
 
 		if ( this.c.footer && this.dom.tfoot.length ) {
 			if ( ! this.s.enable ) {
-				headerMode = 'in-place';
+				footerMode = 'in-place';
 			}
 			else if ( ! position.visible || windowTop + position.windowHeight >= position.tfootBottom + this.c.footerOffset ) {
 				footerMode = 'in-place';
@@ -681,7 +681,7 @@ DataTable.Api.register( 'fixedHeader.enable()', function ( flag ) {
 
 DataTable.Api.register( 'fixedHeader.enabled()', function () {
 	if ( this.context.length ) {
-		var fh = this.content[0]._fixedHeader;
+		var fx = this.content[0]._fixedHeader;
 
 		if ( fh ) {
 			return fh.enabled();
