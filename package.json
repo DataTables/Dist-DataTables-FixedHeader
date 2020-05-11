@@ -1,6 +1,6 @@
 {
     "name": "datatables.net-fixedheader",
-    "version": "3.1.6",
+    "version": "3.1.7",
     "description": "FixedHeader for DataTables ",
     "files": [
         "js/**/*.js"
