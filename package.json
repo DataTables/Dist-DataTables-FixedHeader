@@ -6,6 +6,7 @@
         "js/**/*.js"
     ],
     "main": "js/dataTables.fixedHeader.js",
+    "type": "types.d.ts",
     "keywords": [
         "fixed headers",
         "sticky",
@@ -28,5 +29,8 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/DataTables/Dist-DataTables-FixedHeader.git"
+    },
+    "devDependencies": {
+        "@types/jquery": "^3.5.1"
     }
 }
