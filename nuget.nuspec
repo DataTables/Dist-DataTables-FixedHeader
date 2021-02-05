@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>datatables.net-fixedheader</id>
-        <version>3.1.7</version>
+        <version>3.1.8</version>
         <description>FixedHeader for DataTables</description>
         <authors>SpryMedia Ltd</authors>
         <projectUrl>http://datatables.net</projectUrl>
