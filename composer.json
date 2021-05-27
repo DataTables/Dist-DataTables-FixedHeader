@@ -1,25 +1,32 @@
-
 {
-	"name": "datatables.net/datatables.net-fixedheader",
-	"version": "3.1.7",
-	"description": "DataTables is a plug-in for the jQuery Javascript library. It is a highly flexible tool, based upon the foundations of progressive enhancement, which will add advanced interaction controls to any HTML table. This is the FixedHeader extension for DataTables.", 
-	"homepage": "http://www.datatables.net/",
-	"authors": [{
-		"name": "SpryMedia",
-		"homepage": "https://datatables.net"
-	}], 
-	"license": [
-		"MIT"
-	],
+    "version": "3.1.8",
+    "name": "datatables.net/datatables.net-fixedheader",
+    "description": "When displaying large amounts of data in a table, it can often be useful for the end user to have the column titles always visible. This is particularly true if using DataTables with pagination disabled, or the display length is set to a high value. The FixedHeader extension provides this ability. This is FixedHeader for DataTables",
+    "support": {
+        "forum": "https://datatables.net/forums",
+        "source": "https://github.com/DataTables/Dist-DataTables-FixedHeader"
+    },
+    "homepage": "http://www.datatables.net/",
+    "authors": [
+        {
+            "name": "SpryMedia",
+            "homepage": "https://datatables.net"
+        }
+    ],
+    "license": [
+        "MIT"
+    ],
     "prefer-stable": true,
     "minimum-stability": "dev",
-	"support": {
-		"forum": "https://datatables.net/forums",
-		"source": "https://github.com/DataTables/Dist-DataTables-FixedHeader/"
-    },
-    "keywords": ["DataTables", "jQuery", "table", "fixedheader"],
+    "keywords": [
+        "FixedHeader",
+ "Fixed Headers",
+ "Sticky",
+        "Datatables",
+        "jQuery",
+        "table"
+    ],
     "require": {
-        "components/jquery":">=3.5.1",
-        "datatables.net/datatables.net":">=1.10.15"
+        "datatables.net/datatables.net": ">=1.10.24"
     }
 }

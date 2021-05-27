@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <metadata>
-    <id>datatables.net-fixedheader</id>
-    <version>3.1.8</version>
-    <description>FixedHeader for DataTables</description>
-    <authors>SpryMedia Ltd</authors>
-    <projectUrl>http://datatables.net</projectUrl>
-    <license type="expression">MIT</license>
-    <tags>fixedheader DataTables jQuery table </tags>
-    <repository type="git" url="https://github.com/DataTables/Dist-DataTables-FixedHeader.git"/>
-    <dependencies>
-      <dependency id="jquery" version="1.7.0"/>
-      <dependency id="datatables.net" version="1.10.15"/>
-    </dependencies>
-    <contentFiles>
-      <files include="**/*" buildAction="Content"/>
-    </contentFiles>
-  </metadata>
-  <files>
-    <file src="js/datatables.fixedheader.js" target="content\Scripts"/>
-    <file src="js/datatables.fixedheader.min.js" target="content\Scripts"/>
-    <file src="types.d.ts" target="content\Scripts"/>
-    <file src="js/datatables.fixedheader.js" target="contentFiles\any\any\wwwroot\js"/>
-    <file src="js/datatables.fixedheader.min.js" target="contentFiles\any\any\wwwroot\js"/>
-    <file src="types.d.ts" target="contentFiles\any\any\wwwroot\js"/>
-  </files>
+    <metadata>
+        <version>3.1.8</version>
+        <id>datatables.net-fixedheader</id>
+        <description>This is FixedHeader for DataTables</description>
+        <repository type="git" url="https://github.com/DataTables/Dist-DataTables-FixedHeader.git"/>
+        <authors>SpryMedia Ltd</authors>
+        <projectUrl>http://datatables.net</projectUrl>
+        <license type="expression">MIT</license>
+        <tags>FixedHeader  Fixed Headers  Sticky  Datatables jQuery table</tags>
+        <dependencies>
+            <dependency id="datatables.net" version=">=1.10.24"/>
+        </dependencies>
+        <contentFiles>
+            <files include="**/*" buildAction="Content"/>
+        </contentFiles>
+    </metadata>
+    <files>
+        <file src="js/dataTables.fixedHeader.js" target="content\Scripts"/>
+        <file src="js/dataTables.fixedHeader.js" target="contentFiles\any\any\wwwroot\js"/>
+        <file src="js/dataTables.fixedHeader.min.js" target="content\Scripts"/>
+        <file src="js/dataTables.fixedHeader.min.js" target="contentFiles\any\any\wwwroot\js"/>
+        <file src="types/types.d.ts" target="content\Scripts"/>
+        <file src="types/types.d.ts" target="contentFiles\any\any\wwwroot\js"/>
+    </files>
 </package>
+
