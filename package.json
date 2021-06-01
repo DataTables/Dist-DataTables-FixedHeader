@@ -2,6 +2,7 @@
     "name": "datatables.net-fixedheader",
     "description": "FixedHeader for DataTables",
     "main": "js/dataTables.fixedHeader.js",
+    "types": "./types/types.d.ts",
     "version": "3.1.8",
     "files": [
         "js/**/*.js"
