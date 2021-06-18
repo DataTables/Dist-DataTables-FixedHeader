@@ -1,5 +1,5 @@
 {
-    "version": "3.1.8",
+    "version": "3.1.9",
     "name": "datatables.net/datatables.net-fixedheader",
     "description": "When displaying large amounts of data in a table, it can often be useful for the end user to have the column titles always visible. This is particularly true if using DataTables with pagination disabled, or the display length is set to a high value. The FixedHeader extension provides this ability. This is FixedHeader for DataTables",
     "support": {
@@ -27,6 +27,6 @@
         "table"
     ],
     "require": {
-        "datatables.net/datatables.net": ">=1.10.24"
+        "datatables.net/datatables.net": ">=1.10.26-dev"
     }
 }
