@@ -8,6 +8,6 @@
         "types/types.d.ts"
     ],
     "src-repo": "http://github.com/DataTables/FixedHeader",
-    "last-tag": "3.2.2",
+    "last-tag": "3.2.3",
     "last-sync": "c32bf83752b5aa8f30308ce1da7d7fff704cc621"
 }
