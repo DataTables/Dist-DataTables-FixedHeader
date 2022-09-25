@@ -1,25 +1,6 @@
-/*! FixedHeader 3.2.2
- * ©2009-2021 SpryMedia Ltd - datatables.net/license
- */
 
-/**
- * @summary     FixedHeader
- * @description Fix a table's header or footer, so it is always visible while
- *              scrolling
- * @version     3.2.2
- * @file        dataTables.fixedHeader.js
- * @author      SpryMedia Ltd (www.sprymedia.co.uk)
- * @contact     www.sprymedia.co.uk/contact
- * @copyright   Copyright 2009-2021 SpryMedia Ltd.
- *
- * This source file is free software, available under the following license:
- *   MIT license - http://datatables.net/license/mit
- *
- * This source file is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE. See the license files for details.
- *
- * For details please refer to: http://www.datatables.net
+/*! FixedHeader 3.2.4
+ * ©2009-2022 SpryMedia Ltd - datatables.net/license
  */
 
 (function( factory ){
@@ -33,12 +14,21 @@
 		// CommonJS
 		module.exports = function (root, $) {
 			if ( ! root ) {
+				// CommonJS environments without a window global must pass a
+				// root. This will give an error otherwise
 				root = window;
 			}
 
-			if ( ! $ || ! $.fn.dataTable ) {
-				$ = require('datatables.net')(root, $).$;
+			if ( ! $ ) {
+				$ = typeof window !== 'undefined' ? // jQuery's factory checks for a global window
+					require('jquery') :
+					require('jquery')( root );
 			}
+
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
+
 
 			return factory( $, root, root.document );
 		};
@@ -51,6 +41,26 @@
 'use strict';
 var DataTable = $.fn.dataTable;
 
+
+
+/**
+ * @summary     FixedHeader
+ * @description Fix a table's header or footer, so it is always visible while
+ *              scrolling
+ * @version     3.2.4
+ * @author      SpryMedia Ltd (www.sprymedia.co.uk)
+ * @contact     www.sprymedia.co.uk
+ * @copyright   SpryMedia Ltd.
+ *
+ * This source file is free software, available under the following license:
+ *   MIT license - http://datatables.net/license/mit
+ *
+ * This source file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the license files for details.
+ *
+ * For details please refer to: http://www.datatables.net
+ */
 
 var _instCounter = 0;
 
@@ -228,6 +238,10 @@ $.extend( FixedHeader.prototype, {
 	 */
 	update: function (force)
 	{
+		if (! this.s.enable) {
+			return;
+		}
+
 		var table = this.s.dt.table().node();
 
 		if ( $(table).is(':visible') ) {
@@ -334,6 +348,9 @@ $.extend( FixedHeader.prototype, {
 			itemDom.floating.removeClass( 'fixedHeader-floating fixedHeader-locked' );
 		}
 		else {
+			var docScrollLeft = $(document).scrollLeft();
+			var docScrollTop = $(document).scrollTop();
+
 			if ( itemDom.floating ) {
 				if(itemDom.placeholder !== null) {
 					itemDom.placeholder.remove();
@@ -346,8 +363,6 @@ $.extend( FixedHeader.prototype, {
 			var tableNode = $(dt.table().node()); 
 			var scrollBody = $(tableNode.parent());
 			var scrollEnabled = this._scrollEnabled();
-			var docScrollLeft = $(document).scrollLeft();
-			var docScrollTop = $(document).scrollTop();
 
 			itemDom.floating = $( dt.table().node().cloneNode( false ) )
 				.attr( 'aria-hidden', 'true' )
@@ -420,7 +435,7 @@ $.extend( FixedHeader.prototype, {
 	 * @param {JQuery<HTMLElement>} el 
 	 * @param {string} sign 
 	 */
-	_stickyPosition(el, sign) {
+	_stickyPosition: function(el, sign) {
 		if (this._scrollEnabled()) {
 			var that = this
 			var rtl = $(that.s.dt.table().node()).css('direction') === 'rtl';
@@ -789,7 +804,7 @@ $.extend( FixedHeader.prototype, {
 				// The scrolling plus the header offset plus the height of the header is lower than the top of the body
 				windowTop + this.c.headerOffset + position.theadHeight > bodyTop &&
 				// And the scrolling at the top plus the header offset is above the bottom of the body
-				windowTop + this.c.headerOffset < bodyBottom
+				windowTop + this.c.headerOffset + position.theadHeight < bodyBottom
 			) {
 				headerMode = 'in';
 				var scrollBody = $($(this.s.dt.table().node()).parent());
@@ -961,7 +976,7 @@ $.extend( FixedHeader.prototype, {
  * @type {String}
  * @static
  */
-FixedHeader.version = "3.2.2";
+FixedHeader.version = "3.2.4";
 
 /**
  * Defaults
@@ -1071,5 +1086,5 @@ $.each( ['header', 'footer'], function ( i, el ) {
 } );
 
 
-return FixedHeader;
+return DataTable;
 }));
