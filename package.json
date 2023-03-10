@@ -4,7 +4,7 @@
     "main": "js/dataTables.fixedHeader.js",
     "module": "js/dataTables.fixedHeader.mjs",
     "types": "./types/types.d.ts",
-    "version": "3.3.1",
+    "version": "3.3.2",
     "files": [
         "js/**/*.js",
         "js/**/*.mjs",
