@@ -1,4 +1,4 @@
-/*! FixedHeader 4.0.0
+/*! FixedHeader 3.4.0
  * © SpryMedia Ltd - datatables.net/license
  */
 
@@ -53,9 +53,10 @@ var DataTable = $.fn.dataTable;
  * @summary     FixedHeader
  * @description Fix a table's header or footer, so it is always visible while
  *              scrolling
- * @version     4.0.0
- * @author      SpryMedia Ltd
- * @contact     datatables.net
+ * @version     3.4.0
+ * @author      SpryMedia Ltd (www.sprymedia.co.uk)
+ * @contact     www.sprymedia.co.uk
+ * @copyright   SpryMedia Ltd.
  *
  * This source file is free software, available under the following license:
  *   MIT license - http://datatables.net/license/mit
@@ -70,10 +71,6 @@ var DataTable = $.fn.dataTable;
 var _instCounter = 0;
 
 var FixedHeader = function (dt, config) {
-	if (!DataTable.versionCheck('2')) {
-		throw 'Warning: FixedHeader requires DataTables 2 or newer';
-	}
-
 	// Sanity check - you just know it will happen
 	if (!(this instanceof FixedHeader)) {
 		throw "FixedHeader must be initialised with the 'new' keyword.";
@@ -138,9 +135,7 @@ var FixedHeader = function (dt, config) {
 
 	var dtSettings = dt.settings()[0];
 	if (dtSettings._fixedHeader) {
-		throw (
-			'FixedHeader already initialised on table ' + dtSettings.nTable.id
-		);
+		throw 'FixedHeader already initialised on table ' + dtSettings.nTable.id;
 	}
 
 	dtSettings._fixedHeader = this;
@@ -353,16 +348,14 @@ $.extend(FixedHeader.prototype, {
 
 		if (!force && itemDom.floating) {
 			// existing floating element - reuse it
-			itemDom.floating.removeClass(
-				'fixedHeader-floating fixedHeader-locked'
-			);
+			itemDom.floating.removeClass('fixedHeader-floating fixedHeader-locked');
 		}
 		else {
 			if (itemDom.floating) {
 				if (itemDom.placeholder !== null) {
 					itemDom.placeholder.remove();
 				}
-
+				this._unsize(item);
 				itemDom.floating.children().detach();
 				itemDom.floating.remove();
 			}
@@ -374,6 +367,7 @@ $.extend(FixedHeader.prototype, {
 			itemDom.floating = $(dt.table().node().cloneNode(false))
 				.attr('aria-hidden', 'true')
 				.css({
+					'table-layout': 'fixed',
 					top: 0,
 					left: 0
 				})
@@ -386,26 +380,20 @@ $.extend(FixedHeader.prototype, {
 					overflow: 'hidden',
 					height: 'fit-content',
 					position: 'fixed',
-					left: scrollEnabled
-						? tableNode.offset().left + scrollBody.scrollLeft()
-						: 0
+					left: scrollEnabled ? tableNode.offset().left + scrollBody.scrollLeft() : 0
 				})
 				.css(
 					item === 'header'
 						? {
-								top: this.c.headerOffset,
-								bottom: ''
+							top: this.c.headerOffset,
+							bottom: ''
 						}
 						: {
-								top: '',
-								bottom: this.c.footerOffset
+							top: '',
+							bottom: this.c.footerOffset
 						}
 				)
-				.addClass(
-					item === 'footer'
-						? 'dtfh-floatingparent-foot'
-						: 'dtfh-floatingparent-head'
-				)
+				.addClass(item === 'footer' ? 'dtfh-floatingparentfoot' : 'dtfh-floatingparenthead')
 				.append(itemDom.floating)
 				.appendTo('body');
 
@@ -426,12 +414,8 @@ $.extend(FixedHeader.prototype, {
 
 			itemDom.host.prepend(itemDom.placeholder);
 
-			// Copy the `colgroup` element for widths
-			itemDom.placeholder
-				.parent()
-				.find('colgroup')
-				.clone()
-				.appendTo(itemDom.floating);
+			// Clone widths
+			this._matchWidths(itemDom.placeholder, itemDom.floating);
 		}
 	},
 
@@ -456,21 +440,82 @@ $.extend(FixedHeader.prototype, {
 						// New position either adds or dismisses the barWidth
 						potential =
 							+right.replace(/px/g, '') +
-							(sign === '-' ? -1 : 1) *
-								that.s.dt.settings()[0].oBrowser.barWidth;
+							(sign === '-' ? -1 : 1) * that.s.dt.settings()[0].oBrowser.barWidth;
 
 						$(this).css('right', potential > 0 ? potential : 0);
 					}
 					else if (left !== 'auto' && rtl) {
 						potential =
 							+left.replace(/px/g, '') +
-							(sign === '-' ? -1 : 1) *
-								that.s.dt.settings()[0].oBrowser.barWidth;
+							(sign === '-' ? -1 : 1) * that.s.dt.settings()[0].oBrowser.barWidth;
 
 						$(this).css('left', potential > 0 ? potential : 0);
 					}
 				}
 			});
+		}
+	},
+
+	/**
+	 * Copy widths from the cells in one element to another. This is required
+	 * for the footer as the footer in the main table takes its sizes from the
+	 * header columns. That isn't present in the footer so to have it still
+	 * align correctly, the sizes need to be copied over. It is also required
+	 * for the header when auto width is not enabled
+	 *
+	 * @param  {jQuery} from Copy widths from
+	 * @param  {jQuery} to   Copy widths to
+	 * @private
+	 */
+	_matchWidths: function (from, to) {
+		var get = function (name) {
+			return $(name, from)
+				.map(function () {
+					return (
+						$(this)
+							.css('width')
+							.replace(/[^\d\.]/g, '') * 1
+					);
+				})
+				.toArray();
+		};
+
+		var set = function (name, toWidths) {
+			$(name, to).each(function (i) {
+				$(this).css({
+					width: toWidths[i],
+					minWidth: toWidths[i]
+				});
+			});
+		};
+
+		var thWidths = get('th');
+		var tdWidths = get('td');
+
+		set('th', thWidths);
+		set('td', tdWidths);
+	},
+
+	/**
+	 * Remove assigned widths from the cells in an element. This is required
+	 * when inserting the footer back into the main table so the size is defined
+	 * by the header columns and also when auto width is disabled in the
+	 * DataTable.
+	 *
+	 * @param  {string} item The `header` or `footer`
+	 * @private
+	 */
+	_unsize: function (item) {
+		var el = this.dom[item].floating;
+
+		if (el && (item === 'footer' || (item === 'header' && !this.s.autoWidth))) {
+			$('th, td', el).css({
+				width: '',
+				minWidth: ''
+			});
+		}
+		else if (el && item === 'header') {
+			$('th, td', el).css('min-width', '');
 		}
 	},
 
@@ -489,9 +534,7 @@ $.extend(FixedHeader.prototype, {
 		if (itemDom.floating && lastScrollLeft[item] !== scrollLeft) {
 			// If scrolling is enabled we need to match the floating header to the body
 			if (this._scrollEnabled()) {
-				var newScrollLeft = $(
-					$(this.s.dt.table().node()).parent()
-				).scrollLeft();
+				var newScrollLeft = $($(this.s.dt.table().node()).parent()).scrollLeft();
 				itemDom.floating.scrollLeft(newScrollLeft);
 				itemDom.floatingParent.scrollLeft(newScrollLeft);
 			}
@@ -530,11 +573,15 @@ $.extend(FixedHeader.prototype, {
 
 		// It isn't trivial to add a !important css attribute...
 		var importantWidth = function (w) {
-			itemDom.floating[0].style.setProperty('width', w + 'px', 'important');
+			itemDom.floating.attr('style', function (i, s) {
+				return (s || '') + 'width: ' + w + 'px !important;';
+			});
 
 			// If not scrolling also have to update the floatingParent
 			if (!scrollEnabled) {
-				itemDom.floatingParent[0].style.setProperty('width', w + 'px', 'important');
+				itemDom.floatingParent.attr('style', function (i, s) {
+					return (s || '') + 'width: ' + w + 'px !important;';
+				});
 			}
 		};
 
@@ -553,6 +600,8 @@ $.extend(FixedHeader.prototype, {
 				itemDom.placeholder = null;
 			}
 
+			this._unsize(item);
+
 			if (item === 'header') {
 				itemDom.host.prepend(tablePart);
 			}
@@ -570,9 +619,7 @@ $.extend(FixedHeader.prototype, {
 				itemDom.floatingParent.remove();
 			}
 
-			$($(itemDom.host.parent()).parent()).scrollLeft(
-				scrollBody.scrollLeft()
-			);
+			$($(itemDom.host.parent()).parent()).scrollLeft(scrollBody.scrollLeft());
 		}
 		else if (mode === 'in') {
 			// Remove the header from the read header and insert into a fixed
@@ -590,23 +637,17 @@ $.extend(FixedHeader.prototype, {
 				: position.tfootTop;
 
 			// Calculate the amount that the footer or header needs to be shuffled
-			var shuffle;
-
-			if (item === 'footer') {
-				shuffle =
+			var shuffle =
+				item === 'footer'
+					? // footer and top of body isn't on screen
 					bodyTop > windowBottom
-						? position.tfootHeight // Yes - push the footer below
-						: bodyTop + position.tfootHeight - windowBottom; // No
-			}
-			else {
-				// Otherwise must be a header so get the difference from the bottom of the
-				//  desired floating header and the bottom of the table body
-				shuffle =
-					windowTop +
-					this.c.headerOffset +
-					position.theadHeight -
-					bodyBottom;
-			}
+						? // Yes - push the footer below
+						position.tfootHeight
+						: // No - bottom set to the gap between the top of the body and the bottom of the window
+						bodyTop + position.tfootHeight - windowBottom
+					: // Otherwise must be a header so get the difference from the bottom of the
+					//  desired floating header and the bottom of the table body
+					windowTop + this.c.headerOffset + position.theadHeight - bodyBottom;
 
 			// Set the top or bottom based off of the offset and the shuffle value
 			var prop = item === 'header' ? 'top' : 'bottom';
@@ -617,6 +658,7 @@ $.extend(FixedHeader.prototype, {
 				.css(prop, val)
 				.css({
 					left: position.left,
+					height: item === 'header' ? position.theadHeight : position.tfootHeight,
 					'z-index': 3
 				})
 				.append(itemDom.floating);
@@ -694,12 +736,8 @@ $.extend(FixedHeader.prototype, {
 		position.width = tableNode.outerWidth();
 		position.left = tableNode.offset().left;
 		position.theadTop = thead.offset().top;
-		position.tbodyTop = scrollEnabled
-			? scrollBody.offset().top
-			: tbody.offset().top;
-		position.tbodyHeight = scrollEnabled
-			? scrollBody.outerHeight()
-			: tbody.outerHeight();
+		position.tbodyTop = scrollEnabled ? scrollBody.offset().top : tbody.offset().top;
+		position.tbodyHeight = scrollEnabled ? scrollBody.outerHeight() : tbody.outerHeight();
 		position.theadHeight = thead.outerHeight();
 		position.theadBottom = position.theadTop + position.theadHeight;
 		position.tfootTop = position.tbodyTop + position.tbodyHeight; //tfoot.offset().top;
@@ -745,12 +783,8 @@ $.extend(FixedHeader.prototype, {
 		// Body Details
 		var bodyTop = scrollEnabled ? scrollOffset.top : position.tbodyTop;
 		var bodyLeft = scrollEnabled ? scrollOffset.left : position.left;
-		var bodyBottom = scrollEnabled
-			? scrollOffset.top + scrollHeight
-			: position.tfootTop;
-		var bodyWidth = scrollEnabled
-			? scrollBody.outerWidth()
-			: position.tbodyWidth;
+		var bodyBottom = scrollEnabled ? scrollOffset.top + scrollHeight : position.tfootTop;
+		var bodyWidth = scrollEnabled ? scrollBody.outerWidth() : position.tbodyWidth;
 
 		if (this.c.header) {
 			if (!this.s.enable) {
@@ -760,27 +794,23 @@ $.extend(FixedHeader.prototype, {
 			//  the scroll of the window plus the headerOffset and the height of the header
 			else if (
 				!position.visible ||
-				windowTop + this.c.headerOffset + position.theadHeight <=
-					bodyTop
+				windowTop + this.c.headerOffset + position.theadHeight <= bodyTop
 			) {
 				headerMode = 'in-place';
 			}
 			// The header should be floated if
 			else if (
 				// The scrolling plus the header offset plus the height of the header is lower than the top of the body
-				windowTop + this.c.headerOffset + position.theadHeight >
-					bodyTop &&
+				windowTop + this.c.headerOffset + position.theadHeight > bodyTop &&
 				// And the scrolling at the top plus the header offset is above the bottom of the body
-				windowTop + this.c.headerOffset + position.theadHeight <
-					bodyBottom
+				windowTop + this.c.headerOffset + position.theadHeight < bodyBottom
 			) {
 				headerMode = 'in';
 
 				// Further to the above, If the scrolling plus the header offset plus the header height is lower
 				// than the bottom of the table a shuffle is required so have to force the calculation
 				if (
-					windowTop + this.c.headerOffset + position.theadHeight >
-						bodyBottom ||
+					windowTop + this.c.headerOffset + position.theadHeight > bodyBottom ||
 					this.dom.header.floatingParent === undefined
 				) {
 					forceChange = true;
@@ -815,11 +845,7 @@ $.extend(FixedHeader.prototype, {
 			height: 0
 		};
 
-		if (
-			this.c.footer &&
-			this.dom.tfoot.length &&
-			this.dom.tfoot.find('th, td').length
-		) {
+		if (this.c.footer && this.dom.tfoot.length) {
 			if (!this.s.enable) {
 				footerMode = 'in-place';
 			}
@@ -830,8 +856,7 @@ $.extend(FixedHeader.prototype, {
 				footerMode = 'in-place';
 			}
 			else if (
-				bodyBottom + position.tfootHeight + this.c.footerOffset >
-					windowBottom &&
+				bodyBottom + position.tfootHeight + this.c.footerOffset > windowBottom &&
 				bodyTop + this.c.footerOffset < windowBottom
 			) {
 				footerMode = 'in';
@@ -892,17 +917,12 @@ $.extend(FixedHeader.prototype, {
 
 				// Need some rounding here as sometimes very small decimal places are encountered
 				// If the actual height is bigger or equal to the height we just applied then the footer is "Floating"
-				if (
-					Math.round(scrollBody.outerHeight()) >=
-					Math.round(newHeight)
-				) {
+				if (Math.round(scrollBody.outerHeight()) >= Math.round(newHeight)) {
 					$(this.dom.tfoot.parent()).addClass('fixedHeader-floating');
 				}
 				// Otherwise max-width has kicked in so it is not floating
 				else {
-					$(this.dom.tfoot.parent()).removeClass(
-						'fixedHeader-floating'
-					);
+					$(this.dom.tfoot.parent()).removeClass('fixedHeader-floating');
 				}
 			}
 		}
@@ -920,27 +940,16 @@ $.extend(FixedHeader.prototype, {
 		if (this.s.dt.settings()[0]._fixedColumns !== undefined) {
 			var adjustBlocker = function (side, end, el) {
 				if (el === undefined) {
-					var blocker = $(
-						'div.dtfc-' + side + '-' + end + '-blocker'
-					);
+					var blocker = $('div.dtfc-' + side + '-' + end + '-blocker');
 
-					el =
-						blocker.length === 0
-							? null
-							: blocker.clone().css('z-index', 1);
+					el = blocker.length === 0 ? null : blocker.clone().css('z-index', 1);
 				}
 
 				if (el !== null) {
 					if (headerMode === 'in' || headerMode === 'below') {
 						el.appendTo('body').css({
-							top:
-								end === 'top'
-									? header.offset.top
-									: footer.offset.top,
-							left:
-								side === 'right'
-									? bodyLeft + bodyWidth - el.width()
-									: bodyLeft
+							top: end === 'top' ? header.offset.top : footer.offset.top,
+							left: side === 'right' ? bodyLeft + bodyWidth - el.width() : bodyLeft
 						});
 					}
 					else {
@@ -957,11 +966,7 @@ $.extend(FixedHeader.prototype, {
 				'top',
 				this.dom.header.rightBlocker
 			);
-			this.dom.header.leftBlocker = adjustBlocker(
-				'left',
-				'top',
-				this.dom.header.leftBlocker
-			);
+			this.dom.header.leftBlocker = adjustBlocker('left', 'top', this.dom.header.leftBlocker);
 			this.dom.footer.rightBlocker = adjustBlocker(
 				'right',
 				'bottom',
@@ -993,7 +998,7 @@ $.extend(FixedHeader.prototype, {
  * @type {String}
  * @static
  */
-FixedHeader.version = '4.0.0';
+FixedHeader.version = '3.4.0';
 
 /**
  * Defaults
