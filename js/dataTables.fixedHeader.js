@@ -122,13 +122,13 @@ var FixedHeader = function (dt, config) {
 		header: {
 			host: null,
 			floating: null,
-			floatingParent: $('<div class="dtfh-floatingparent">'),
+			floatingParent: $('<div class="dtfh-floatingparent"><div></div></div>'),
 			placeholder: null
 		},
 		footer: {
 			host: null,
 			floating: null,
-			floatingParent: $('<div class="dtfh-floatingparent">'),
+			floatingParent: $('<div class="dtfh-floatingparent"><div></div></div>'),
 			placeholder: null
 		}
 	};
@@ -363,6 +363,7 @@ $.extend(FixedHeader.prototype, {
 					itemDom.placeholder.remove();
 				}
 
+				this._unsize(item);
 				itemDom.floating.children().detach();
 				itemDom.floating.remove();
 			}
@@ -405,8 +406,9 @@ $.extend(FixedHeader.prototype, {
 						? 'dtfh-floatingparent-foot'
 						: 'dtfh-floatingparent-head'
 				)
-				.append(itemDom.floating)
-				.appendTo('body');
+				.appendTo('body')
+				.children()
+				.append(itemDom.floating);
 
 			this._stickyPosition(itemDom.floating, '-');
 
@@ -428,12 +430,8 @@ $.extend(FixedHeader.prototype, {
 			itemDom.host.prepend(itemDom.placeholder);
 			itemDom.floating.append(itemElement);
 
-			// Copy the `colgroup` element for widths
-			itemDom.placeholder
-				.parent()
-				.find('colgroup')
-				.clone()
-				.appendTo(itemDom.floating);
+			// Clone widths
+			this._matchWidths(itemDom.placeholder, itemDom.floating);
 		}
 	},
 
@@ -475,6 +473,79 @@ $.extend(FixedHeader.prototype, {
 			});
 		}
 	},
+
+	/**
+	 * Copy widths from the cells in one element to another. This is required
+	 * for the footer as the footer in the main table takes its sizes from the
+	 * header columns. That isn't present in the footer so to have it still
+	 * align correctly, the sizes need to be copied over. It is also required
+	 * for the header when auto width is not enabled
+	 *
+	 * @param  {jQuery} from Copy widths from
+	 * @param  {jQuery} to   Copy widths to
+	 * @private
+	 */
+	_matchWidths: function (from, to) {
+		var get = function (name) {
+			return $(name, from)
+				.map(function () {
+					return (
+						$(this)
+							.css('width')
+							.replace(/[^\d\.]/g, '') * 1
+					);
+				})
+				.toArray();
+		};
+
+		var set = function (name, toWidths) {
+			$(name, to).each(function (i) {
+				$(this).css({
+					width: toWidths[i],
+					minWidth: toWidths[i]
+				});
+			});
+		};
+
+		var thWidths = get('th');
+		var tdWidths = get('td');
+
+		set('th', thWidths);
+		set('td', tdWidths);
+
+		if (this._scrollEnabled()) {
+			var headerHost = $('div.dt-scroll-headInner', this.s.dt.table().container());
+
+			to.parent().css({
+				'padding-right': headerHost.css('padding-right'),
+				width: 'fit-content'
+			});
+		}
+	},
+
+	/**
+	 * Remove assigned widths from the cells in an element. This is required
+	 * when inserting the footer back into the main table so the size is defined
+	 * by the header columns and also when auto width is disabled in the
+	 * DataTable.
+	 *
+	 * @param  {string} item The `header` or `footer`
+	 * @private
+	 */
+	_unsize: function (item) {
+		var el = this.dom[item].floating;
+
+		if (el && (item === 'footer' || (item === 'header' && !this.s.autoWidth))) {
+			$('th, td', el).css({
+				width: '',
+				minWidth: ''
+			});
+		}
+		else if (el && item === 'header') {
+			$('th, td', el).css('min-width', '');
+		}
+	},
+
 
 	/**
 	 * Reposition the floating elements to take account of horizontal page
@@ -555,6 +626,8 @@ $.extend(FixedHeader.prototype, {
 				itemDom.placeholder = null;
 			}
 
+			this._unsize(item);
+
 			if (item === 'header') {
 				itemDom.host.prepend(tablePart);
 			}
@@ -620,8 +693,7 @@ $.extend(FixedHeader.prototype, {
 				.css({
 					left: position.left,
 					'z-index': 3
-				})
-				.append(itemDom.floating);
+				});
 
 			importantWidth(position.width);
 
@@ -793,6 +865,7 @@ $.extend(FixedHeader.prototype, {
 							top: this.c.headerOffset,
 							position: 'fixed'
 						})
+						.children()
 						.append(this.dom.header.floating);
 				}
 			}
