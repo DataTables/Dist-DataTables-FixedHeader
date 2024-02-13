@@ -381,7 +381,7 @@ $.extend(FixedHeader.prototype, {
 
 			itemDom.floatingParent
 				.css({
-					width: scrollBody.width(),
+					width: scrollBody[0].offsetWidth,
 					overflow: 'hidden',
 					height: 'fit-content',
 					position: 'fixed',
@@ -407,6 +407,7 @@ $.extend(FixedHeader.prototype, {
 				)
 				.appendTo('body')
 				.children()
+				.eq(0)
 				.append(itemDom.floating);
 
 			this._stickyPosition(itemDom.floating, '-');
