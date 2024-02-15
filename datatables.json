@@ -10,6 +10,6 @@
         "types/types.d.ts"
     ],
     "src-repo": "http://github.com/DataTables/FixedHeader",
-    "last-tag": "3.4.0",
+    "last-tag": "4.0.0",
     "last-sync": "3ebdf24395abbc40f46353bc58b4268eb5351020"
 }
