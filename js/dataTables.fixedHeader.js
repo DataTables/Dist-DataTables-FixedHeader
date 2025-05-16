@@ -1,4 +1,4 @@
-/*! FixedHeader 4.0.1
+/*! FixedHeader 4.0.2
  * © SpryMedia Ltd - datatables.net/license
  */
 
@@ -53,7 +53,7 @@ var DataTable = $.fn.dataTable;
  * @summary     FixedHeader
  * @description Fix a table's header or footer, so it is always visible while
  *              scrolling
- * @version     4.0.1
+ * @version     4.0.2
  * @author      SpryMedia Ltd
  * @contact     datatables.net
  *
@@ -1060,7 +1060,7 @@ $.extend(FixedHeader.prototype, {
  * @type {String}
  * @static
  */
-FixedHeader.version = '4.0.1';
+FixedHeader.version = '4.0.2';
 
 /**
  * Defaults
