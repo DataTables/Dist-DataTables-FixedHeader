@@ -718,7 +718,7 @@ $.extend(FixedHeader.prototype, {
 		this.s.scrollLeft.footer = -1;
 		this.s[item + 'Mode'] = mode;
 
-		dt.trigger('fixedheader-mode', [mode]);
+		dt.trigger('fixedheader-mode', [mode, item]);
 	},
 
 	/**
