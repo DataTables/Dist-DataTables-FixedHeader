@@ -346,7 +346,6 @@ $.extend(FixedHeader.prototype, {
 					itemDom.placeholder.remove();
 				}
 
-				itemDom.scrollAdjust.detach();
 				itemDom.floating.remove();
 			}
 
