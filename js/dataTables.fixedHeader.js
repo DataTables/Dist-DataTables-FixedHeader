@@ -674,7 +674,10 @@ $.extend(FixedHeader.prototype, {
 				});
 
 			importantWidth(position.width);
-			scrollLeftUpdate();
+
+			if (scrollLeftUpdate) {
+				scrollLeftUpdate();
+			}
 
 			if (item === 'footer') {
 				itemDom.floating.css('top', '');
