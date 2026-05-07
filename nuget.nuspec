@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
-        <version>4.0.6</version>
+        <version>5.0.0-beta.1</version>
         <id>datatables.net-fixedheader</id>
         <description>This is FixedHeader for DataTables</description>
-        <repository type="git" url="https://github.com/DataTables/Dist-DataTables-FixedHeader.git"/>
+        <repository type="git" url="https://github.com/DataTables/FixedHeader"/>
         <authors>SpryMedia Ltd</authors>
         <projectUrl>http://datatables.net</projectUrl>
         <license type="expression">MIT</license>
-        <tags>FixedHeader  Fixed Headers  Sticky  Datatables jQuery table</tags>
+        <tags>FixedHeader  Fixed Headers  Sticky  Datatables table</tags>
         <dependencies>
-            <dependency id="datatables.net" version="2.3.2"/>
+            <dependency id="datatables.net" version="3.0.0-0"/>
         </dependencies>
         <contentFiles>
             <files include="**/*" buildAction="Content"/>
         </contentFiles>
+        <readme>Readme.md</readme>
     </metadata>
     <files>
+        <file src="Readme.md" target=""/>
         <file src="js/dataTables.fixedHeader.js" target="content\Scripts"/>
         <file src="js/dataTables.fixedHeader.js" target="contentFiles\any\any\wwwroot\js"/>
         <file src="js/dataTables.fixedHeader.min.js" target="content\Scripts"/>
@@ -27,4 +29,3 @@
         <file src="js/dataTables.fixedHeader.mjs" target="contentFiles\any\any\wwwroot\js"/>
     </files>
 </package>
-
