@@ -120,7 +120,7 @@ declare module 'datatables.net' {
     interface Context {
         _fixedHeader: FixedHeader;
     }
-    interface Config {
+    interface Options {
         fixedHeader?: boolean | Options;
     }
     interface Defaults {
