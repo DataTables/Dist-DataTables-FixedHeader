@@ -1,4 +1,4 @@
-/*! Select 5.0.0 for DataTables
+/*! FixedHeader 5.0.0 for DataTables
  * Copyright (c) SpryMedia Ltd - datatables.net/license
  */
 
