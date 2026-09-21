@@ -1,14 +1,13 @@
 {
     "name": "datatables.net-fixedheader",
     "description": "FixedHeader for DataTables",
-    "main": "js/dataTables.fixedHeader.js",
-    "module": "js/dataTables.fixedHeader.mjs",
+    "main": "./js/dataTables.fixedHeader.js",
+    "module": "./js/dataTables.fixedHeader.mjs",
     "types": "./types/types.d.ts",
     "version": "5.0.0",
     "files": [
-        "js/**/*.js",
-        "js/**/*.mjs",
-        "types/**/*.d.ts"
+        "js",
+        "types"
     ],
     "keywords": [
         "FixedHeader",
@@ -32,5 +31,16 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/DataTables/FixedHeader.git"
-    }
+    },
+    "exports": {
+        ".": {
+            "types": "./types/types.d.ts",
+            "import": "./js/dataTables.fixedHeader.mjs",
+            "default": "./js/dataTables.fixedHeader.mjs",
+            "require": "./js/dataTables.fixedHeader.js"
+        },
+        "./js/*": "./js/*",
+        "./package.json": "./package.json"
+    },
+    "sideEffects": true
 }
