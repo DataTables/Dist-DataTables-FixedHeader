@@ -4,7 +4,7 @@
     "main": "./js/dataTables.fixedHeader.js",
     "module": "./js/dataTables.fixedHeader.mjs",
     "types": "./types/types.d.ts",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "files": [
         "js",
         "types"
@@ -19,7 +19,7 @@
         "sort"
     ],
     "dependencies": {
-        "datatables.net": "^3"
+        "datatables.net": "^3.1"
     },
     "author": {
         "name": "SpryMedia Ltd",
