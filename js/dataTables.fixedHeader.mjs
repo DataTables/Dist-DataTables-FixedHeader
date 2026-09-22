@@ -1,4 +1,4 @@
-/*! FixedHeader 5.0.0 for DataTables
+/*! FixedHeader 5.1.0 for DataTables
  * Copyright (c) SpryMedia Ltd - datatables.net/license
  */
 
@@ -888,7 +888,7 @@ FixedHeader.defaults = {
     footerOffset: 0
 };
 /** Version */
-FixedHeader.version = '5.0.0';
+FixedHeader.version = '5.1.0';
 
 
 if (!DataTable || !DataTable.versionCheck('3.1')) {
