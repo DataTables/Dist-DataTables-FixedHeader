@@ -36,8 +36,8 @@
         ".": {
             "types": "./types/types.d.ts",
             "import": "./js/dataTables.fixedHeader.mjs",
-            "default": "./js/dataTables.fixedHeader.mjs",
-            "require": "./js/dataTables.fixedHeader.js"
+            "require": "./js/dataTables.fixedHeader.js",
+            "default": "./js/dataTables.fixedHeader.mjs"
         },
         "./js/*": "./js/*",
         "./package.json": "./package.json"
