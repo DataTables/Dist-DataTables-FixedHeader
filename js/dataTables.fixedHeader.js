@@ -635,7 +635,7 @@ class FixedHeader {
         var tbody = this.dom.tbody;
         var scrollBody = tableNode.parent();
         position.visible = tableNode.isVisible();
-        position.width = tableNode.width('outer');
+        position.width = tableNode.width('withBorder');
         position.left = tableNode.offset().left;
         position.theadTop = thead.offset().top;
         position.tbodyTop = scrollEnabled
